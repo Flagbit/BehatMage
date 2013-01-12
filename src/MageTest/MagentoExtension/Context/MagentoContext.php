@@ -11,18 +11,19 @@ use MageTest\MagentoExtension\Context\MagentoAwareContext,
     MageTest\MagentoExtension\Service\Session;
 
 use Behat\MinkExtension\Context\MinkAwareInterface,
-    Behat\Behat\Context\BehatContext,
-    Behat\Gherkin\Node\TableNode,
-    Behat\Mink\Mink;
+    Behat\MinkExtension\Context\MinkContext,
+    Behat\Gherkin\Node\TableNode;
 
-class MagentoContext extends BehatContext implements MinkAwareInterface, MagentoAwareInterface
+//require_once 'PHPUnit/Autoload.php';
+require_once 'PHPUnit/Framework/Assert/Functions.php';
+
+
+class MagentoContext extends MinkContext implements MinkAwareInterface, MagentoAwareInterface
 {
     private $app;
     private $configManager;
     private $cacheManager;
     private $factory;
-    private $mink;
-    private $minkProperties;
     private $sessionService;
 
     /**
@@ -31,8 +32,25 @@ class MagentoContext extends BehatContext implements MinkAwareInterface, Magento
     public function iLoginAsAdmin($username, $password)
     {
         $sid = $this->sessionService->adminLogin($username, $password);
-        $this->mink->getSession()->setCookie('adminhtml', $sid);
+        $this->getSession()->setCookie('adminhtml', $sid);
     }
+
+    /**
+     * @Given /^I am logged in as admin user "([^"]*)" identified by "([^"]*)"$/
+     */
+    public function iAmLoggedInAsAdminUserIdentifiedBy($username, $password)
+    {
+        $this->getSession()->visit($this->locatePath('/admin'));
+
+        if (false === strpos(parse_url($this->getSession()->getCurrentUrl(), PHP_URL_PATH), '/admin/dashboard/')) {
+            $this->getSession()->getPage()->fillField('login[username]', $username);
+            $this->getSession()->getPage()->fillField('login[password]', $password);
+            $this->getSession()->getPage()->pressButton('Login');
+        }
+
+        assertTrue(false !== strpos(parse_url($this->getSession()->getCurrentUrl(), PHP_URL_PATH), '/admin/dashboard/'), 'User is redirected on /admin/dashboard');
+    }
+
 
     /**
      * @When /^I open admin URI "([^"]*)"$/
@@ -42,40 +60,26 @@ class MagentoContext extends BehatContext implements MinkAwareInterface, Magento
         $urlModel = new \Mage_Adminhtml_Model_Url();
         if (preg_match('@^/admin/(.*?)/(.*?)((/.*)?)$@', $uri, $m)) {
             $processedUri = "/admin/{$m[1]}/{$m[2]}/key/".$urlModel->getSecretKey($m[1], $m[2])."/{$m[3]}";
-            $this->mink->getSession()->visit($processedUri);
+            $this->getSession()->visit($this->locatePath($processedUri));
         } else {
             throw new \InvalidArgumentException('$uri parameter should start with /admin/ and contain controller and action elements');
         }
     }
 
     /**
-     * @When /^I am on "([^"]*)"$/
-     */
-    public function iAmOn($uri)
-    {
-        $this->mink->getSession()->visit($uri);
-    }
-
-    /**
-     * @Then /^I should see text "([^"]*)"$/
-     */
+    * @Then /^I should see text "([^"]*)"$/
+    */
     public function iShouldSeeText($text)
     {
-        $select = '//*[text()="'.$text.'"]';
-        if (!$this->mink->getSession()->getDriver()->find($select)) {
-            throw new \Behat\Mink\Exception\ElementNotFoundException($this->mink->getSession(), 'xpath', $select, null);
-        }
+        $this->assertPageContainsText($text);
     }
 
     /**
-     * @Then /^I should not see text "([^"]*)"$/
-     */
+    * @Then /^I should not see text "([^"]*)"$/
+    */
     public function iShouldNotSeeText($text)
     {
-        $select = '//*[text()="'.$text.'"]';
-        if ($this->mink->getSession()->getDriver()->find($select)) {
-            throw new \Exception("the given text \"$text\" is unexpectedly found.");
-        }
+        $this->assertPageNotContainsText($text);
     }
 
     /**
@@ -140,18 +144,21 @@ class MagentoContext extends BehatContext implements MinkAwareInterface, Magento
         $this->sessionService = $session;
     }
 
-    public function setMink(Mink $mink)
-    {
-        $this->mink = $mink;
-    }
-
-    public function setMinkParameters(array $parameters)
-    {
-        $this->minkParameters = $parameters;
-    }
-
     public function getFixture($identifier)
     {
         return $this->factory->create($identifier);
+    }
+
+    public function locatePath($path)
+    {
+        if(strpos($path, 'http') !== false){
+            return $path;
+        }
+
+        $startUrl = rtrim($this->getMinkParameter('base_url'), '/') . '/';
+        if(strpos($startUrl, 'http') === false){
+            $startUrl = 'http://'.$startUrl;
+        }   
+        return $startUrl . ltrim($path, '/');
     }
 }
