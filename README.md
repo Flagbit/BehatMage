@@ -5,4 +5,7 @@ Behat extension for Magento, providing Behat context with specific Magento requi
 
 # Documentation
 
-This is coming very soon!
+Based on https://github.com/MageTest/BehatMage with removed phpspec part
+allows to run browser based tests with Selenium2
+
+see https://github.com/magento-hackathon/MageBehat
