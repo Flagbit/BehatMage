@@ -14,6 +14,7 @@ class Extension extends BaseExtension
      */
     public function load(array $config, ContainerBuilder $container)
     {
+        $container->setParameter('magento.base_url', \Mage::getStoreConfig('web/unsecure/base_url'));
         $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/services'));
         $loader->load('core.xml');
     }
