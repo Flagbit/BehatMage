@@ -15,7 +15,7 @@ use Behat\MinkExtension\Context\MinkAwareInterface,
     Behat\Gherkin\Node\TableNode;
 
 //require_once 'PHPUnit/Autoload.php';
-require_once 'PHPUnit/Framework/Assert/Functions.php';
+// require_once 'PHPUnit/Framework/Assert/Functions.php';
 
 
 class MagentoContext extends MinkContext implements MinkAwareInterface, MagentoAwareInterface
@@ -48,7 +48,7 @@ class MagentoContext extends MinkContext implements MinkAwareInterface, MagentoA
             $this->getSession()->getPage()->pressButton('Login');
         }
 
-        assertTrue(false !== strpos(parse_url($this->getSession()->getCurrentUrl(), PHP_URL_PATH), '/admin/dashboard/'), 'User is redirected on /admin/dashboard');
+        $this->assertSession()->addressMatches('#^/admin/dashboard/.+$#');
     }
 
 
