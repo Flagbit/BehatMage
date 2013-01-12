@@ -8,3 +8,6 @@ default:
             goutte:
                 server_parameters:
                     HTTP_HOST: %behat.mink.base_url%
+            selenium2: ~
+            default_session: selenium2
+            javascript_session: selenium2
