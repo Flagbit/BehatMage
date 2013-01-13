@@ -42,6 +42,7 @@
             <argument type="service" id="behat.magento.service.config_manager" />
             <argument type="service" id="behat.magento.fixture.fixture_factory" />
             <argument type="service" id="behat.magento.service.session" />
+            <argument type="service" id="service_container" />
             <tag name="behat.context.initializer" />
         </service>
         <service id="behat.magento.fixture.fixture_factory" class="%behat.magento.fixture.fixture_factory%" />

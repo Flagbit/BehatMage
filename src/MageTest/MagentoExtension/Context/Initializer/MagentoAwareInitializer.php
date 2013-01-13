@@ -24,14 +24,17 @@ class MagentoAwareInitializer implements InitializerInterface
 
     private $session = null;
 
+    private $container = null;
+
     public function __construct(Bootstrap $bootstrap, CacheManager $cache,
-        ConfigManager $config, FixtureFactory $factory, Session $session)
+        ConfigManager $config, FixtureFactory $factory, Session $session, ContainerInterface $container)
     {
         $this->app = $bootstrap->app();
         $this->cacheManager = $cache;
         $this->configManager = $config;
         $this->factory = $factory;
         $this->session = $session;
+        $this->container = $container;
     }
 
     public function supports(ContextInterface $context)
