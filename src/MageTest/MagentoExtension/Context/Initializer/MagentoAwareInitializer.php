@@ -2,6 +2,8 @@
 
 namespace MageTest\MagentoExtension\Context\Initializer;
 
+use Symfony\Component\DependencyInjection\ContainerInterface;
+
 use MageTest\MagentoExtension\Service\Bootstrap,
     MageTest\MagentoExtension\Service\CacheManager,
     MageTest\MagentoExtension\Service\ConfigManager,
